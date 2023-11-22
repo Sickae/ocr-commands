@@ -1,4 +1,3 @@
-# <auth rm ChelleRae
 import pytesseract
 from PIL import ImageGrab
 import pyautogui
@@ -71,10 +70,16 @@ def remove_auth_command(args):
 def sp_command():
     print('sp command')
 
+def buffs_command():
+    for buff in config['BuffPositions']:
+        pyautogui.click(buff['X'], buff['Y'])
+        time.sleep(.5)
+
 COMMAND_FUNCTIONS = {
     "ADD_AUTH": add_auth_command,
     "REMOVE_AUTH": remove_auth_command,
-    "SP": sp_command
+    "SP": sp_command,
+    "BUFFS": buffs_command
 }
 
 while True:
