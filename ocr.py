@@ -8,12 +8,6 @@ import re
 # Constants
 CFG_PATH = 'ocr.cfg'
 
-# test
-region_left = 515
-region_top = 230
-region_width = 120
-region_height = 30
-
 with open(CFG_PATH, 'r') as file:
     config = json.load(file)
 
@@ -33,7 +27,10 @@ def get_auth_level(name):
     return auth['Level'] if auth is not None else None
 
 def look_for_command():
-    text = extract_text_from_screen(region_left, region_top, region_width, region_height)\
+    text = extract_text_from_screen(config['ChatRegion']['Left'],
+                                    config['ChatRegion']['Top'],
+                                    config['ChatRegion']['Width'],
+                                    config['ChatRegion']['Height'])
         .strip()
     
     print(f'text: {repr(text)}')
