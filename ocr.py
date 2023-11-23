@@ -45,7 +45,7 @@ def sleep():
     time.sleep(config['TypeInterval'])
 
 def extract_chat_message(text):
-    pattern = '(.+)\s+.{1}\s(.+)'
+    pattern = '(.+)\\s+.{1}\\s(.+)'
     matched = re.match(pattern, text)
     return (matched.groups()[0], matched.groups()[1]) if matched else None
 
