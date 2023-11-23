@@ -77,6 +77,9 @@ def look_for_command():
             if command_function:
                 function_arguments = matched.groups()
                 command_function(function_arguments)
+                message = command.get('Message')
+                if message is not None:
+                    write_to_chat(message)
                 break
     
     time.sleep(1)
@@ -103,7 +106,7 @@ def sp_command(args):
 
 def buffs_command(args):
     for buff in config['BuffPositions']:
-        pyautogui.click(buff['X'], buff['Y'])
+        pyautogui.click(button='right', x=buff['X'], y=buff['Y'])
         sleep()
 
 COMMAND_FUNCTIONS = {
