@@ -4,6 +4,8 @@ import json
 import time
 import re
 import os
+import pydirectinput
+from pywinauto import Desktop
 
 # Constants
 BASE_CFG_PATH = 'ocr.cfg'
@@ -130,7 +132,10 @@ def buffs_command(args):
         button = buff.get('PressButton')
 
         if button:
-            pyautogui.press(button)
+            app = Desktop(backend="uia").window(title='CABAL')
+            app.set_focus()
+            sleep()
+            pydirectinput.press(button)
         else:
             pyautogui.click(button='right', x=buff['X'], y=buff['Y'])
 
