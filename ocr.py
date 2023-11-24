@@ -87,20 +87,14 @@ def look_for_party_invite():
                                     config['PartyRegion']['Width'],
                                     config['PartyRegion']['Height'])\
                                         .strip()
-    pyautogui.screenshot('ss.png', region=(config['PartyRegion']['Left'],
-            config['PartyRegion']['Top'],
-            config['PartyRegion']['Width'],
-            config['PartyRegion']['Height']))
+
     pattern = '.*\\[(.+)\\].+'
-    print(text)
     matched = re.search(pattern, text, re.MULTILINE)
 
-    print(matched)
     if not matched:
         return
 
     name = matched.groups()[0]
-    print(name)
     auth_level = get_auth_level(name)
     if auth_level is not None and auth_level >= config['AutoParty']['MinimumLevel']:
         pyautogui.click(config['AutoParty']['Accept']['X'], config['AutoParty']['Accept']['Y'])
@@ -133,7 +127,13 @@ def sp_command(args):
 
 def buffs_command(args):
     for buff in config['BuffPositions']:
-        pyautogui.click(button='right', x=buff['X'], y=buff['Y'])
+        button = buff.get('PressButton')
+
+        if button:
+            pyautogui.press(button)
+        else:
+            pyautogui.click(button='right', x=buff['X'], y=buff['Y'])
+
         sleep()
 
 COMMAND_FUNCTIONS = {
