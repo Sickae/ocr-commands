@@ -58,7 +58,6 @@ def write_to_chat(str):
     pyautogui.press('enter')
 
 def look_for_command():
-    pyautogui.screenshot
     text = extract_text_from_screen(config['ChatRegion']['Left'],
                                     config['ChatRegion']['Top'],
                                     config['ChatRegion']['Width'],
@@ -81,8 +80,36 @@ def look_for_command():
                 if message is not None:
                     write_to_chat(message)
                 break
-    
-    time.sleep(1)
+
+def look_for_party_invite():
+    text = extract_text_from_screen(config['PartyRegion']['Left'],
+                                    config['PartyRegion']['Top'],
+                                    config['PartyRegion']['Width'],
+                                    config['PartyRegion']['Height'])\
+                                        .strip()
+    pyautogui.screenshot('ss.png', region=(config['PartyRegion']['Left'],
+            config['PartyRegion']['Top'],
+            config['PartyRegion']['Width'],
+            config['PartyRegion']['Height']))
+    pattern = '.*\\[(.+)\\].+'
+    print(text)
+    matched = re.search(pattern, text, re.MULTILINE)
+
+    print(matched)
+    if not matched:
+        return
+
+    name = matched.groups()[0]
+    print(name)
+    auth_level = get_auth_level(name)
+    if auth_level is not None and auth_level >= config['AutoParty']['MinimumLevel']:
+        pyautogui.click(config['AutoParty']['Accept']['X'], config['AutoParty']['Accept']['Y'])
+        cmd_name = config['AutoParty'].get('CommandOnJoin')
+        command_function = COMMAND_FUNCTIONS.get(cmd_name) if cmd_name else None
+        if command_function:
+            command_function(None)
+    else:
+        pyautogui.click(config['AutoParty']['Decline']['X'], config['AutoParty']['Decline']['Y'])
 
 # Commands
 
@@ -119,3 +146,5 @@ COMMAND_FUNCTIONS = {
 config = read_config()
 while True:
     look_for_command()
+    look_for_party_invite()
+    time.sleep(1)
