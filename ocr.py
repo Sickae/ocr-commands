@@ -73,11 +73,12 @@ def look_for_command():
     for command in config['Commands']:
         command_trigger = f'{config["CommandPrefix"]}{command["Regex"]}'
         matched = re.match(command_trigger, chat_msg[1])
-        if matched and get_auth_level(chat_msg[0]) >= command['MinimumLevel']:
+        auth_level = get_auth_level(chat_msg[0])
+        if matched and auth_level and auth_level >= command['MinimumLevel']:
             command_function = COMMAND_FUNCTIONS.get(command['Name'])
             if command_function:
                 function_arguments = matched.groups()
-                command_function(function_arguments)
+                command_function(auth_level, function_arguments)
                 message = command.get('Message')
                 if message is not None:
                     write_to_chat(message)
@@ -103,20 +104,31 @@ def look_for_party_invite():
         cmd_name = config['AutoParty'].get('CommandOnJoin')
         command_function = COMMAND_FUNCTIONS.get(cmd_name) if cmd_name else None
         if command_function:
-            command_function(None)
+            command_function(auth_level, None)
     else:
         pyautogui.click(config['AutoParty']['Decline']['X'], config['AutoParty']['Decline']['Y'])
 
+def activate_buff(buff):
+    button = buff.get('PressButton')
+
+    if button:
+        app = Desktop(backend="uia").window(title='CABAL')
+        app.set_focus()
+        sleep()
+        pydirectinput.press(button)
+    else:
+        pyautogui.click(button='right', x=buff['X'], y=buff['Y'])
+
 # Commands
 
-def add_auth_command(args):
+def add_auth_command(sender_level, args):
     if get_auth_level(args[0]) is not None:
         return
     
     config['Authorization'].append({"Name": args[0], "Level": int(args[1])})
     save_cfg()
 
-def remove_auth_command(args):
+def remove_auth_command(sender_level, args):
     if get_auth_level(args[0]) is None:
         return
 
@@ -124,21 +136,16 @@ def remove_auth_command(args):
     config['Authorization'].remove(auth)
     save_cfg()
 
-def sp_command(args):
-    write_to_chat('/p todo')
+def sp_command(sender_level, args):
+    sp_buff = next((item for item in config['Buffs'] if item.get('Name') == 'Raise Spirit'), None)
+    if sp_buff:
+        activate_buff(sp_buff)
 
-def buffs_command(args):
-    for buff in config['BuffPositions']:
-        button = buff.get('PressButton')
-
-        if button:
-            app = Desktop(backend="uia").window(title='CABAL')
-            app.set_focus()
-            sleep()
-            pydirectinput.press(button)
-        else:
-            pyautogui.click(button='right', x=buff['X'], y=buff['Y'])
-
+def buffs_command(sender_level, args):
+    for buff in config['Buffs']:
+        min_level = buff.get('MinimumLevel')
+        if min_level is None or sender_level >= min_level:
+            activate_buff(buff)
         sleep()
 
 COMMAND_FUNCTIONS = {
